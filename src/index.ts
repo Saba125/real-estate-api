@@ -7,10 +7,13 @@ import rateLimiter from "express-rate-limit"
 import cookieParser from "cookie-parser"
 import router from "./routes/routes"
 import path from "path"
+import { Client } from "pg"
 import authMiddleware from "./middlewares/auth"
 import adminMiddleware from "./middlewares/permission"
+import { connectDB } from "./db/db_connection"
 // Load environment variables from .env file
-
+import DbTools from "./db/db_tools"
+import { IDbTools } from "../interfaces"
 const app = express()
 dotenv.config()
 const corsOptions = {
@@ -36,10 +39,19 @@ app.use("/images", express.static(path.join(__dirname, "../../public/images")))
 app.use("/videos", express.static(path.join(__dirname, "../../public/videos")))
 
 // Routes
+
 app.use("/api/v1", router)
 const PORT = process.env.PORT || 3000
+
 // Run app
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`)
+app.listen(PORT, async () => {
+  try {
+    const db = await connectDB()
+    app.locals.db = DbTools
+
+    console.log(`Server is running on port ${PORT}`)
+  } catch (error) {
+    console.error("Failed to connect to the database", error)
+  }
 })

@@ -1,13 +1,9 @@
-import delete_user from "./delete_user"
-import get_single_user from "./get_single_user"
-import login from "./login/index"
-import register from "./register/index"
-import update_user_role from "./update_user_role"
+import login from "./login"
+import register from "./register"
+import verifyEmail from "./verify-email"
 const usersController = {
   register,
   login,
-  get_single_user,
-  update_user_role,
-  delete_user,
+  verifyEmail,
 }
 export default usersController
