@@ -94,73 +94,110 @@ const DbTools: Partial<IDbTools> = {
   },
 
   async update(
-  table_name: string, // Table name
-  params: Record<string, any> // Data to update, including the WHERE clause parameter
-): Promise<IDbResponse> {
-  const client = await pool.connect();
-  try {
-    // Validate input
-    if (!table_name || typeof table_name !== "string") {
-      throw new Error("Invalid table name");
-    }
-    if (!params || Object.keys(params).length === 0) {
-      throw new Error("Params object cannot be empty");
-    }
-
-    // Extract the WHERE clause parameter (e.g., `id`)
-    const whereKey = "id"; // Convention: Use `id` as the WHERE clause key
-    const whereValue = params[whereKey];
-
-    if (!whereValue) {
-      throw new Error(`Missing WHERE clause parameter: ${whereKey}`);
-    }
-
-    // Remove the WHERE clause parameter from the params object
-    const { [whereKey]: _, ...updateParams } = params;
-
-    // Extract columns and values from the updateParams object
-    const columns = Object.keys(updateParams);
-    const values = Object.values(updateParams);
-
-    // Generate the SET clause for the query (e.g., "column1 = $1, column2 = $2")
-    const setClause = columns
-      .map((col, index) => `${col} = $${index + 1}`)
-      .join(", ");
-
-    // Construct the SQL query
-    const query = `
-      UPDATE ${table_name}
-      SET ${setClause}
-      WHERE ${whereKey} = $${columns.length + 1}  -- Use the WHERE clause parameter
-      RETURNING *;
-    `;
-
-    // Combine the update values and WHERE clause parameter
-    const queryParams = [...values, whereValue];
-
-    // Execute the query
-    const res = await client.query(query, queryParams);
-
-    // Return the updated row(s) as an object or list
-    if (res.rows.length === 1) {
-      return { data: res.rows[0] }; // Return a single object if one row is updated
-    } else if (res.rows.length > 1) {
-      return { list: res.rows }; // Return a list if multiple rows are updated
-    } else {
-      return { data: null }; // Return null if no rows are updated
-    }
-  } catch (error: any) {
-    console.error("update error:", error.message);
-    return { error: { message: error.message } };
-  } finally {
-    client.release();
-  }
-},
-  async delete(query: string, params: any[] = []): Promise<IDbResponse> {
+    table_name: string, // Table name
+    params: Record<string, any> // Data to update, including the WHERE clause parameter
+  ): Promise<IDbResponse> {
     const client = await pool.connect()
     try {
-      const res = await client.query(query, params)
-      return { list: res.rows || [] }
+      // Validate input
+      if (!table_name || typeof table_name !== "string") {
+        throw new Error("Invalid table name")
+      }
+      if (!params || Object.keys(params).length === 0) {
+        throw new Error("Params object cannot be empty")
+      }
+
+      // Extract the WHERE clause parameter (e.g., `id`)
+      const whereKey = "id" // Convention: Use `id` as the WHERE clause key
+      const whereValue = params[whereKey]
+
+      if (!whereValue) {
+        throw new Error(`Missing WHERE clause parameter: ${whereKey}`)
+      }
+
+      // Remove the WHERE clause parameter from the params object
+      const { [whereKey]: _, ...updateParams } = params
+
+      // Extract columns and values from the updateParams object
+      const columns = Object.keys(updateParams)
+      const values = Object.values(updateParams)
+
+      // Generate the SET clause for the query (e.g., "column1 = $1, column2 = $2")
+      const setClause = columns
+        .map((col, index) => `${col} = $${index + 1}`)
+        .join(", ")
+
+      // Construct the SQL query
+      const query = `
+      UPDATE ${table_name}
+      SET ${setClause}
+      WHERE ${whereKey} = $${
+        columns.length + 1
+      }  -- Use the WHERE clause parameter
+      RETURNING *;
+    `
+
+      // Combine the update values and WHERE clause parameter
+      const queryParams = [...values, whereValue]
+
+      // Execute the query
+      const res = await client.query(query, queryParams)
+
+      // Return the updated row(s) as an object or list
+      if (res.rows.length === 1) {
+        return { data: res.rows[0] } // Return a single object if one row is updated
+      } else if (res.rows.length > 1) {
+        return { list: res.rows } // Return a list if multiple rows are updated
+      } else {
+        return { data: null } // Return null if no rows are updated
+      }
+    } catch (error: any) {
+      console.error("update error:", error.message)
+      return { error: { message: error.message } }
+    } finally {
+      client.release()
+    }
+  },
+  async delete(
+    table_name: string, // Table name
+    params: Record<string, any> // Parameters for the WHERE clause
+  ): Promise<IDbResponse> {
+    const client = await pool.connect()
+    try {
+      // Validate input
+      if (!table_name || typeof table_name !== "string") {
+        throw new Error("Invalid table name")
+      }
+      if (!params || Object.keys(params).length === 0) {
+        throw new Error("Params object cannot be empty")
+      }
+
+      // Extract the WHERE clause key and value
+      const whereKey = Object.keys(params)[0] // Use the first key as the WHERE clause
+      const whereValue = params[whereKey]
+
+      if (!whereValue) {
+        throw new Error(`Missing WHERE clause parameter: ${whereKey}`)
+      }
+
+      // Construct the SQL query
+      const query = `
+      DELETE FROM ${table_name}
+      WHERE ${whereKey} = $1
+      RETURNING *;  -- Return the deleted row(s)
+    `
+
+      // Execute the query
+      const res = await client.query(query, [whereValue])
+
+      // Return the deleted row(s) as an object or list
+      if (res.rows.length === 1) {
+        return { data: res.rows[0] } // Return a single object if one row is deleted
+      } else if (res.rows.length > 1) {
+        return { list: res.rows } // Return a list if multiple rows are deleted
+      } else {
+        return { data: null } // Return null if no rows are deleted
+      }
     } catch (error: any) {
       console.error("delete error:", error.message)
       return { error: { message: error.message } }

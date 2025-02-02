@@ -20,6 +20,7 @@ Router.get("/auth/aboutMe", authMiddleware, usersController.aboutMe)
 Router.post(
   "/property",
   authMiddleware,
+  roleMiddleware(Roles.Seller),
   upload.array("images"),
   propertyController.add_property
 )
@@ -29,5 +30,16 @@ Router.put(
   roleMiddleware(Roles.Seller),
   upload.array("images"),
   propertyController.edit_property
+)
+Router.delete(
+  "/property/:id",
+  authMiddleware,
+  roleMiddleware(Roles.Seller),
+  propertyController.delete_property
+)
+Router.get(
+  "/property/:id",
+  authMiddleware,
+  propertyController.get_single_property
 )
 export default Router
