@@ -1,11 +1,15 @@
 import { Request, Response, NextFunction } from "express"
 import Utils from "../utils"
 
-export default function roleMiddleware(requiredRole: string) {
+export default function roleMiddleware(
+  requiredRole: string,
+  secondRequiredRole?: string
+) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const user: any = req.user
-      if (user.role === requiredRole) {
+      const rolesArray = [requiredRole, secondRequiredRole]
+      if (rolesArray.includes(user.role)) {
         return next()
       } else {
         console.log(`You are not authorized as a ${requiredRole}`)
