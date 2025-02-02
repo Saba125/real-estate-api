@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import Utils from "../utils/index"
 import jwt, { JwtPayload } from "jsonwebtoken"
-import { User } from "@prisma/client"
 
 // Extend the Request interface to include a `user` field
 declare module "express-serve-static-core" {
@@ -17,17 +16,6 @@ export default function authMiddleware(
 ) {
   const token = req.signedCookies?.token
 
-  if (!token) {
-    return Utils.sendError(
-      res,
-      {
-        status: "error",
-        message: "Token is missing",
-      },
-      401
-    )
-  }
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!)
 
@@ -41,14 +29,6 @@ export default function authMiddleware(
     return next()
   } catch (error) {
     console.error("JWT verification error:", error)
-
-    return Utils.sendError(
-      res,
-      {
-        status: "error",
-        message: "Invalid or expired token",
-      },
-      403
-    )
+    return res.status(401).render("login", { error: "Please log in" })
   }
 }

@@ -1,0 +1,64 @@
+//- Register Email Template
+doctype html
+html
+  head
+    title= subject
+    meta(charset='UTF-8')
+    style.
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f7fc;
+        margin: 0;
+        padding: 0;
+      }
+      .email-container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .header h1 {
+        font-size: 24px;
+        color: #333;
+      }
+      .content p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.5;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: #777;
+      }
+      .footer a {
+        color: #3498db;
+        text-decoration: none;
+      }
+      div a {
+        text-align: "center"
+      }
+      
+
+body
+  .email-container
+    .header
+      h1= subject
+    .content
+      p Hello, #{to}, thank you for signing up with us! We are excited to welcome you to our service.
+      p Please verify your email address by clicking the link below:
+      p 
+        div 
+          a(href=verificationUrl) Verify your Email
+      p If you have any questions or need support, feel free to contact us anytime.
+    .footer
+      p Best regards,<br/> The Team
+      p If you didn't sign up for this service, please ignore this email or <a href="mailto:support@yourdomain.com">contact us</a>.

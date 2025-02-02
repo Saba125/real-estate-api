@@ -3,6 +3,7 @@ import { IDbTools } from "../../../../interfaces"
 import registerSchema from "./schema"
 import Utils from "../../../utils"
 import crypto, { hash } from "crypto"
+import { send_register_email } from "../../../mail"
 export default async function register(req: Request, res: Response) {
   const db: IDbTools = req.app.locals.db
   const { email, password } = req.body
@@ -37,7 +38,12 @@ export default async function register(req: Request, res: Response) {
   }
   const verificationUrl = `http://localhost:5173/verify-email?verificationCode=${dbRes.data.verificationtoken}&email=${dbRes.data.email}`
   const token = Utils.createToken(dbRes.data)
-
+  await send_register_email(
+    dbRes.data.email,
+    "Registration",
+    "Welcome!",
+    verificationUrl
+  )
   Utils.sendSuccess(res, {
     message: "Please check your email now",
   })
