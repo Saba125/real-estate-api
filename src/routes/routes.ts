@@ -4,6 +4,8 @@ import authMiddleware from "../middlewares/auth"
 import propertyController from "../controllers/property/export"
 import upload from "../config/multer"
 import roleMiddleware from "../middlewares/permission"
+import favoritesController from "../controllers/favorites/export"
+import reviewsController from "../controllers/reviews/export"
 export enum Roles {
   Buyer = "buyer",
   Seller = "seller",
@@ -42,4 +44,20 @@ Router.get(
   authMiddleware,
   propertyController.get_single_property
 )
+Router.get("/property", authMiddleware, propertyController.get_property)
+// favorites
+Router.post(
+  "/favorites/property",
+  authMiddleware,
+  favoritesController.add_favorite
+)
+Router.get(
+  "/favorites/property",
+  authMiddleware,
+  favoritesController.get_favorited_property
+)
+// reviews
+Router.post("/reviews", authMiddleware, reviewsController.add_review)
+Router.get("/reviews/:id", authMiddleware, reviewsController.get_review)
+
 export default Router
